@@ -1,3 +1,3 @@
-exports.testBuyer = (req, res) => {
-  res.json({ message: 'Buyer route working!' });
-};
+// exports.testBuyer = (req, res) => {
+//   res.json({ message: 'Buyer route working!' });
+// };

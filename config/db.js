@@ -3,11 +3,11 @@ require('dotenv').config();
 const Buyer = require('../models/Buyer');
 const Seller = require('../models/Seller');
 const Admin = require('../models/Admin');
-const Product = require('../models/Product');
-const Category = require('../models/Category');
-const Wishlist = require('../models/Wishlist');
-const CartItem = require('../models/CartItem');
-const ProductImage = require('../models/ProductImage');
+// const Product = require('../models/Product');
+// const Category = require('../models/Category');
+// const Wishlist = require('../models/Wishlist');
+// const CartItem = require('../models/CartItem');
+// const ProductImage = require('../models/ProductImage');
 
 const connectDB = async () => {
   try {
@@ -24,11 +24,11 @@ const connectDB = async () => {
       Buyer.init(),
       Seller.init(),
       Admin.init(),
-      Product.init(),
-      Category.init(),
-      Wishlist.init(),
-      CartItem.init(),
-      ProductImage.init(),
+      // Product.init(),
+      // Category.init(),
+      // Wishlist.init(),
+      // CartItem.init(),
+      // ProductImage.init(),
     ]);
 
     console.log('Collections initialized');
