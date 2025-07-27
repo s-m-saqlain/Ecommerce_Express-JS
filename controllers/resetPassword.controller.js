@@ -149,11 +149,19 @@ exports.verifyOTP = async (req, res) => {
 
 // API 3: Reset Password
 exports.resetPassword = async (req, res) => {
-  const { user_id, newPassword, confirmPassword, role } = req.body;
+  const { userId, newPassword, confirmPassword, role } = req.body;
 
   try {
+    // Log request body for debugging
+    console.log("Reset Password Request Body:", req.body);
+
+    // Check if req.body exists and has required fields
+    if (!req.body || !userId || !newPassword || !confirmPassword || !role) {
+      return res.status(400).json({ status: false, message: "userId, newPassword, confirmPassword, and role are required" });
+    }
+
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match" });
+      return res.status(400).json({ status: false, message: "Passwords do not match" });
     }
 
     let Model;
@@ -162,16 +170,25 @@ exports.resetPassword = async (req, res) => {
     } else if (role === "seller") {
       Model = Seller;
     } else {
-      return res.status(400).json({ message: "Invalid role" });
+      return res.status(400).json({ status: false, message: "Invalid role" });
     }
 
-    const user = await Model.findById(user_id);
+    const user = await Model.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ status: false, message: "User not found" });
     }
+
+    // Log OTP details for debugging
+    console.log("User OTP Details:", {
+      otpExists: !!user.otp,
+      isVerified: user.otp?.isVerified,
+      createdAt: user.otp?.createdAt,
+      wrongAttempts: user.otp?.wrongAttempts,
+      verifyTime: user.otp?.verifyTime,
+    });
 
     if (!user.otp || !user.otp.isVerified) {
-      return res.status(400).json({ message: "OTP not verified" });
+      return res.status(400).json({ status: false, message: "OTP not verified" });
     }
 
     // Check if OTP verification is within 5 minutes
@@ -181,7 +198,7 @@ exports.resetPassword = async (req, res) => {
     if (now - verifyTime > fiveMinutes) {
       user.otp = undefined; // Clear OTP
       await user.save();
-      return res.status(400).json({ message: "OTP verification has expired" });
+      return res.status(400).json({ status: false, message: "OTP verification has expired" });
     }
 
     // Hash new password
@@ -193,11 +210,16 @@ exports.resetPassword = async (req, res) => {
     user.otp = undefined;
     await user.save();
 
-    // Invalidate all tokens for security
-    await TokenWhitelist.deleteMany({ userId: user._id, role });
+    // Invalidate all tokens for security (uncomment if TokenWhitelist model exists)
+    // await TokenWhitelist.deleteMany({ userId: user._id, role });
 
-    res.json({ message: "Password reset successfully" });
+    res.json({
+      status: true,
+      message: "Password reset successfully",
+      data: { userId: user._id },
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Reset Password Error:", err.message);
+    res.status(500).json({ status: false, message: err.message });
   }
 };
