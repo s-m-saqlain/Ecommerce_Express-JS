@@ -71,12 +71,12 @@ exports.sendOTP = async (req, res) => {
     // Send OTP via email
     await sendOTPEmail(email, otp);
 
-    res.json({ 
-        status: true,
-        message: "OTP sent to email",
-        data:{
-            user_id:user._id
-        } 
+    res.json({
+      status: true,
+      message: "OTP sent to email",
+      data: {
+        user_id: user._id,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -85,7 +85,7 @@ exports.sendOTP = async (req, res) => {
 
 // API 2: Verify OTP
 exports.verifyOTP = async (req, res) => {
-  const { email, otp, role } = req.body;
+  const { user_id, otp, role } = req.body;
 
   try {
     let Model;
@@ -97,13 +97,18 @@ exports.verifyOTP = async (req, res) => {
       return res.status(400).json({ message: "Invalid role" });
     }
 
-    const user = await Model.findOne({ email });
+    const user = await Model.findById(user_id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     if (!user.otp || !user.otp.hash) {
       return res.status(400).json({ message: "No OTP found for this user" });
+    }
+
+    // If already verified
+    if (user.otp.isVerified) {
+      return res.status(200).json({ message: "OTP already verified" });
     }
 
     // Check if OTP is expired (5 minutes)
@@ -123,7 +128,9 @@ exports.verifyOTP = async (req, res) => {
       if (user.otp.wrongAttempts >= 3) {
         user.otp = undefined; // Clear OTP after 3 wrong attempts
         await user.save();
-        return res.status(400).json({ message: "Maximum OTP attempts exceeded" });
+        return res
+          .status(400)
+          .json({ message: "Maximum OTP attempts exceeded" });
       }
       await user.save();
       return res.status(400).json({ message: "Invalid OTP" });
@@ -142,7 +149,7 @@ exports.verifyOTP = async (req, res) => {
 
 // API 3: Reset Password
 exports.resetPassword = async (req, res) => {
-  const { email, newPassword, confirmPassword, role } = req.body;
+  const { user_id, newPassword, confirmPassword, role } = req.body;
 
   try {
     if (newPassword !== confirmPassword) {
@@ -158,7 +165,7 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Invalid role" });
     }
 
-    const user = await Model.findOne({ email });
+    const user = await Model.findById(user_id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -184,7 +191,7 @@ exports.resetPassword = async (req, res) => {
     // Update password and clear OTP
     user.password = hashedPassword;
     user.otp = undefined;
-    await user露
+    await user.save();
 
     // Invalidate all tokens for security
     await TokenWhitelist.deleteMany({ userId: user._id, role });

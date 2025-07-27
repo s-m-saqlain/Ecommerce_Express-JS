@@ -15,6 +15,7 @@ const buyerSchema = new mongoose.Schema({
     hash: { type: String }, // Hashed OTP
     createdAt: { type: Date }, // OTP creation time
     isVerified: { type: Boolean, default: false }, // OTP verification status
+    verifyTime: { type: Date }, // <-- add this if not already present
     wrongAttempts: { type: Number, default: 0 }, // Number of wrong OTP attempts
   },
 });
