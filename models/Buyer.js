@@ -11,6 +11,12 @@ const buyerSchema = new mongoose.Schema({
       quantity: { type: Number, default: 1 },
     },
   ],
+  otp: {
+    hash: { type: String }, // Hashed OTP
+    createdAt: { type: Date }, // OTP creation time
+    isVerified: { type: Boolean, default: false }, // OTP verification status
+    wrongAttempts: { type: Number, default: 0 }, // Number of wrong OTP attempts
+  },
 });
 
 module.exports = mongoose.model('Buyer', buyerSchema);

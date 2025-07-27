@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const tokenWhitelistSchema = new mongoose.Schema({
   token: { type: String, required: true },
-  email: { type: String, required: true }, 
+  // email: { type: String, required: true }, 
   role: { type: String, enum: ["buyer", "seller", "admin"], required: true },
   userId: {
     type: mongoose.Schema.Types.ObjectId, 
