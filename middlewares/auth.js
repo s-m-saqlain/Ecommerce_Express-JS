@@ -1,16 +1,19 @@
 const jwt = require('jsonwebtoken');
 const keys = require('../config/keys');
 
-function authenticateRole(role) {
-  return (req, res, next) => {
+const authenticate = (userType) => {
+  return async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'No token provided' });
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
 
     try {
-      let secret;
-      if (role === 'admin') secret = keys.ADMIN_SECRET;
-      if (role === 'seller') secret = keys.SELLER_SECRET;
-      if (role === 'buyer') secret = keys.BUYER_SECRET;
+      const secret = {
+        admin: keys.ADMIN_SECRET,
+        buyer: keys.BUYER_SECRET,
+        seller: keys.SELLER_SECRET,
+      }[userType];
 
       const decoded = jwt.verify(token, secret);
       req.user = decoded;
@@ -19,6 +22,6 @@ function authenticateRole(role) {
       res.status(403).json({ message: 'Invalid or expired token' });
     }
   };
-}
+};
 
-module.exports = authenticateRole;
+module.exports = authenticate;

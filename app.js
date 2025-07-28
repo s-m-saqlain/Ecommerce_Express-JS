@@ -1,16 +1,18 @@
-const express = require("express");
+const express = require('express');
+const connectDB = require('./config/db');
+const errorHandler = require('./middlewares/errorHandler');
+require('dotenv').config();
+
 const app = express();
-const connectDB = require("./config/db");
-require("dotenv").config();
 
 // Middleware
 app.use(express.json());
 
 // Routes
-// app.use('/api/buyer', require('./routes/buyer.routes'));
-// app.use('/api/seller', require('./routes/seller.routes'));
-// app.use('/api/admin', require('./routes/admin.routes'));
-app.use("/api/auth", require("./routes/auth.routes")); // ✅ Very important line
+app.use('/api/auth', require('./routes/index'));
+
+// Error Handler
+app.use(errorHandler);
 
 // Connect DB and start server
 connectDB();

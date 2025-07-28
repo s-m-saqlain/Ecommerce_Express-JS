@@ -1,24 +1,16 @@
 const mongoose = require('mongoose');
 const connectDB = require('../config/db');
-const Admin = require('../models/Admin');
-const Buyer = require('../models/Buyer');
-const Seller = require('../models/Seller');
-const Product = require('../models/Product');
-const Category = require('../models/Category');
-const Wishlist = require('../models/Wishlist');
+const models = [
+  require('../models/Admin'),
+  require('../models/Buyer'),
+  require('../models/Seller'),
+  require('../models/TokenWhitelist'),
+];
 
 const initDB = async () => {
   try {
     await connectDB();
-
-    // Register models to ensure collections are created
-    await Admin.createCollection();
-    await Buyer.createCollection();
-    await Seller.createCollection();
-    await Product.createCollection();
-    await Category.createCollection();
-    await Wishlist.createCollection();
-
+    await Promise.all(models.map(Model => Model.createCollection()));
     console.log('Collections initialized in Ecommerce database');
     process.exit(0);
   } catch (error) {
